@@ -76,7 +76,7 @@ module.exports = {
       systemvars: true,
     }),
     new HtmlWebPackPlugin({
-      title: 'Belcorp',
+      title: 'Landing',
       template: "./src/index.html",
     }),
   ],
