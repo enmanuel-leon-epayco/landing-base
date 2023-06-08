@@ -1,21 +1,34 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
-const Dontenv = require('dotenv-webpack');
+const Dotenv = require("dotenv-webpack");
+const path = require('path');
 
 const deps = require("./package.json").dependencies;
+
 module.exports = {
   output: {
-    publicPath: "http://localhost:3000/",
+    path: path.resolve(__dirname, 'build'),
+    filename: 'app.[contentHash].js'
   },
+  devtool: "source-map",
 
+  performance: {
+    hints: false,
+    maxEntrypointSize: 512000,
+    maxAssetSize: 512000
+  },
   resolve: {
     extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
   },
 
   devServer: {
-    port: 3000,
-    historyApiFallback: true,
-    hot: false,
+    static: {
+      directory: path.join(__dirname, 'build'),
+    },
+    host: '127.0.0.1',
+    compress: true,
+    port: 9000,
+    historyApiFallback: true
   },
 
   module: {
@@ -32,38 +45,39 @@ module.exports = {
         use: ["style-loader", "css-loader", "postcss-loader"],
       },
       {
+        test: /\.(woff|woff2|eot|ttf|otf)$/,
+        use: {
+          loader: 'url-loader',
+        }
+      },
+      {
         test: /\.(ts|tsx|js|jsx)$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
         },
       },
+      {
+        test: /\.(png|jpg|svg)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192
+            }
+          }
+        ]
+      },
     ],
   },
 
   plugins: [
-    new Dontenv(),
-    /*
-    new ModuleFederationPlugin({
-      name: "home",
-      filename: "remoteEntry.js",
-      remotes: {},
-      exposes: {},
-      shared: {
-        ...deps,
-        react: {
-          singleton: true,
-          requiredVersion: deps.react,
-        },
-        "react-dom": {
-          singleton: true,
-          requiredVersion: deps["react-dom"],
-        },
-      },
-    }),*/
+    new Dotenv({
+      systemvars: true,
+    }),
     new HtmlWebPackPlugin({
+      title: 'Belcorp',
       template: "./src/index.html",
     }),
   ],
-  
 };
